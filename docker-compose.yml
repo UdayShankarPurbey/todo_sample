@@ -1,0 +1,20 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./todo_backend
+    container_name: backend
+    restart: always
+    env_file:
+      - ./todo_backend/.env
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build: ./todo_frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "4201:4201"
+    depends_on:
+      - backend
