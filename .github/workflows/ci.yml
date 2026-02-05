@@ -2,10 +2,11 @@ name: build-and-lint
 
 # on which branch you want to set
 on:
-  PUSH: 
-    branches : [main]
+  push: 
+    branches: [main,dev]
   pull_request:
-    branches : [main]
+    branches: [main,dev]
+
 
 jobs:
   build-and-lint:
