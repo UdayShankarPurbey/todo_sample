@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { TodoFormInterface, TodoInterface } from '../../models/todo-interface';
 import { CommonModule } from '@angular/common';
 import { form, FormField, maxLength, minLength, required, submit } from '@angular/forms/signals';
@@ -12,7 +12,7 @@ import { firstValueFrom } from 'rxjs';
   styleUrl: './todo.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Todo {
+export class TodoComponent {
   todoServices = inject(TodoServices);
   isModalOpen = signal(false);
   isEditMode = signal(false);
@@ -45,8 +45,8 @@ export class Todo {
       console.log('object', this.reloadTrigger());
 
       const sub = this.todoServices.getTodos().subscribe({
-        next: (tasks: any) =>
-          this.tasksList.set(tasks.map((task: any) => ({ ...task, loader: false }))),
+        next: (tasks: TodoInterface[]) =>
+          this.tasksList.set(tasks.map((task: TodoInterface) => ({ ...task, loader: false }))),
         error: (err) => console.error('Error fetching tasks', err),
       });
 

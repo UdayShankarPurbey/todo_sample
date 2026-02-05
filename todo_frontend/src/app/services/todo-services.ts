@@ -2,13 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../environments/environment.development';
 import { TodoInterface, TodoPayload } from '../models/todo-interface';
-import { map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TodoServices {
-  
   private httpClient = inject(HttpClient);
   private apiUrl = environment.apiUrl;
 

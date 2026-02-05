@@ -4,18 +4,20 @@
     <div class="max-w-4xl mx-auto px-6 py-5 flex justify-between items-center">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Task Manager</h1>
-        <p class="text-sm text-gray-500">
-          Simple task management for DevOps demo
-        </p>
+        <p class="text-sm text-gray-500">Simple task management for DevOps demo</p>
       </div>
 
-      <button (click)="openAddModal()"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow">
+      <button
+        (click)="openAddModal()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow"
+      >
         Add Task
       </button>
 
-      <button (click)="reloadTodos()"
-        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow">
+      <button
+        (click)="reloadTodos()"
+        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow"
+      >
         Refresh
       </button>
     </div>
@@ -23,115 +25,124 @@
 
   <!-- Tasks -->
   <div class="max-w-4xl mx-auto px-6 py-8">
-    <h2 class="text-lg font-semibold text-gray-800 mb-4">
-      Your Tasks ({{ tasksList().length }})
-    </h2>
+    <h2 class="text-lg font-semibold text-gray-800 mb-4">Your Tasks ({{ tasksList().length }})</h2>
 
     <div class="space-y-4">
       @for (task of tasksList(); track task._id) {
-      <div class="bg-white rounded-xl border p-5 shadow-sm flex justify-between">
-        <div>
-          <h3 class="font-semibold text-gray-900">
-            {{ task.title }}
-          </h3>
+        <div class="bg-white rounded-xl border p-5 shadow-sm flex justify-between">
+          <div>
+            <h3 class="font-semibold text-gray-900">
+              {{ task.title }}
+            </h3>
 
-          <p class="text-sm text-gray-500 mt-1">
-            {{ task.description }}
-          </p>
+            <p class="text-sm text-gray-500 mt-1">
+              {{ task.description }}
+            </p>
 
-          <div class="text-xs text-gray-400 mt-3">
-            {{ getTimeAgo(task.updatedAt) }}
-          </div>
-        </div>
-
-        <div class="flex gap-2">
-          @if(task.loader) {
-          <!-- Loader -->
-          <div class="flex flex-col items-center justify-center w-full ">
-            <div class="w-12 h-12 border-4 border-dashed border-yellow-500 rounded-full animate-spin"></div>
-            <h2 class="mt-4 text-lg font-medium text-zinc-900 dark:text-white">Loading...</h2>
+            <div class="text-xs text-gray-400 mt-3">
+              {{ getTimeAgo(task.updatedAt) }}
+            </div>
           </div>
 
-          } @else {
-          <!-- Edit -->
-          <button (click)="openEditModal(task)" class="text-blue-600 hover:bg-blue-50 p-2 rounded-lg">
-            ✏️
-          </button>
+          <div class="flex gap-2">
+            @if (task.loader) {
+              <!-- Loader -->
+              <div class="flex flex-col items-center justify-center w-full">
+                <div
+                  class="w-12 h-12 border-4 border-dashed border-yellow-500 rounded-full animate-spin"
+                ></div>
+                <h2 class="mt-4 text-lg font-medium text-zinc-900 dark:text-white">Loading...</h2>
+              </div>
+            } @else {
+              <!-- Edit -->
+              <button
+                (click)="openEditModal(task)"
+                class="text-blue-600 hover:bg-blue-50 p-2 rounded-lg"
+              >
+                ✏️
+              </button>
 
-          <!-- Delete -->
-          <button (click)="deleteTask(task._id)" class="text-red-500 hover:bg-red-50 p-2 rounded-lg">
-            🗑️
-          </button>
-          }
-
+              <!-- Delete -->
+              <button
+                (click)="deleteTask(task._id)"
+                class="text-red-500 hover:bg-red-50 p-2 rounded-lg"
+              >
+                🗑️
+              </button>
+            }
+          </div>
         </div>
-      </div>
       } @empty {
-      <li>There are no items.</li>
+        <li>There are no items.</li>
       }
-
     </div>
   </div>
 
   <!-- Modal -->
   @if (isModalOpen()) {
-  <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-    <div class="bg-white rounded-xl w-full max-w-md p-6">
+    <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+      <div class="bg-white rounded-xl w-full max-w-md p-6">
+        <form (submit)="saveTask($event)">
+          <h3 class="text-lg font-semibold mb-4">
+            {{ isEditMode() ? 'Edit Task' : 'Add Task' }}
+          </h3>
 
-      <form (submit)="saveTask($event)">
-        <h3 class="text-lg font-semibold mb-4">
-          {{ isEditMode() ? 'Edit Task' : 'Add Task' }}
-        </h3>
+          <div class="space-y-4">
+            <label>
+              Title
+              <input
+                type="text"
+                placeholder="Title"
+                [formField]="form.title"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            </label>
 
-        <div class="space-y-4">
+            @if (form.title().invalid() && form.title().touched()) {
+              <div class="error">
+                @for (error of form.title().errors(); track error.kind) {
+                  <span>{{ error.message }}</span>
+                }
+              </div>
+            }
 
+            <label>
+              Description
+              <textarea
+                rows="3"
+                placeholder="Description"
+                [formField]="form.description"
+                class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
+              ></textarea>
+            </label>
 
-          <label>
-            Title
-            <input type="text" placeholder="Title" [formField]="form.title"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-          </label>
-
-          @if (form.title().invalid() && form.title().touched()) {
-          <div class="error">
-            @for (error of form.title().errors(); track error.kind) {
-            <span>{{ error.message }}</span>
+            @if (form.description().invalid() && form.description().touched()) {
+              <div class="error">
+                @for (error of form.description().errors(); track error.kind) {
+                  <span>{{ error.message }}</span>
+                }
+              </div>
             }
           </div>
-          }
 
+          <div class="flex justify-end gap-3 mt-6">
+            <button
+              (click)="closeModal()"
+              class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+            >
+              Cancel
+            </button>
 
-          <label>
-            Description
-            <textarea rows="3" placeholder="Description" [formField]="form.description"
-              class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-          </label>
-
-          @if (form.description().invalid() && form.description().touched()) {
-          <div class="error">
-            @for (error of form.description().errors(); track error.kind) {
-            <span>{{ error.message }}</span>
-            }
+            <button
+              type="submit"
+              [disabled]="form().invalid()"
+              class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg"
+            >
+              {{ isEditMode() ? 'Update' : 'Add' }}
+            </button>
           </div>
-          }
-
-
-        </div>
-
-        <div class="flex justify-end gap-3 mt-6">
-          <button (click)="closeModal()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
-            Cancel
-          </button>
-
-          <button type="submit" [disabled]="form().invalid()"
-            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
-            {{ isEditMode() ? 'Update' : 'Add' }}
-          </button>
-        </div>
-      </form>
-
-
+        </form>
+      </div>
     </div>
-  </div>
   }
 </div>

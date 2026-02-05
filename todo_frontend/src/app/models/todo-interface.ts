@@ -14,7 +14,7 @@ export interface TodoPayload {
 }
 
 export interface TodoFormInterface {
-  _id ?: string | number;
+  _id?: string | number;
   title: string;
   description: string;
   completed: boolean;

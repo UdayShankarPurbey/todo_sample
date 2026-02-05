@@ -1,4 +1,4 @@
-const Todo = require("../models/Todo");
+const Todo = require('../models/Todo');
 
 // CREATE todo
 exports.createTodo = async (req, res) => {
@@ -24,22 +24,18 @@ exports.getTodos = async (req, res) => {
 exports.getTodoById = async (req, res) => {
   try {
     const todo = await Todo.findById(req.params.id);
-    if (!todo) return res.status(404).json({ message: "Todo not found" });
+    if (!todo) return res.status(404).json({ message: 'Todo not found' });
     res.json(todo);
   } catch (error) {
-    res.status(400).json({ message: "Invalid ID" });
+    res.status(400).json({ message: 'Invalid ID' });
   }
 };
 
 // UPDATE todo
 exports.updateTodo = async (req, res) => {
   try {
-    const todo = await Todo.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!todo) return res.status(404).json({ message: "Todo not found" });
+    const todo = await Todo.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!todo) return res.status(404).json({ message: 'Todo not found' });
     res.json(todo);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -50,9 +46,9 @@ exports.updateTodo = async (req, res) => {
 exports.deleteTodo = async (req, res) => {
   try {
     const todo = await Todo.findByIdAndDelete(req.params.id);
-    if (!todo) return res.status(404).json({ message: "Todo not found" });
-    res.json({ message: "Todo deleted" });
+    if (!todo) return res.status(404).json({ message: 'Todo not found' });
+    res.json({ message: 'Todo deleted' });
   } catch (error) {
-    res.status(400).json({ message: "Invalid ID" });
+    res.status(400).json({ message: 'Invalid ID' });
   }
 };
