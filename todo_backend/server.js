@@ -9,7 +9,7 @@ connectDB();
 const app = express();
 
 
-// const allowedOrigins = ['https://myfrontend.com'];
+const allowedOrigins = ['https://myfrontend.com'];
 
 const cors_config = {
   // origin: function (origin, callback) {
