@@ -6,6 +6,7 @@ exports.createTodo = async (req, res) => {
     const todo = await Todo.create(req.body);
     res.status(201).json(todo);
   } catch (error) {
+    console.error('error while crete todo',error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -16,6 +17,7 @@ exports.getTodos = async (req, res) => {
     const todos = await Todo.find();
     res.json(todos);
   } catch (error) {
+    console.error('error while fetching todo',error);
     res.status(500).json({ message: error.message });
   }
 };
@@ -27,6 +29,7 @@ exports.getTodoById = async (req, res) => {
     if (!todo) return res.status(404).json({ message: 'Todo not found' });
     res.json(todo);
   } catch (error) {
+    console.error('error while fetching by id todo',error);
     res.status(400).json({ message: 'Invalid ID' });
   }
 };
@@ -38,6 +41,7 @@ exports.updateTodo = async (req, res) => {
     if (!todo) return res.status(404).json({ message: 'Todo not found' });
     res.json(todo);
   } catch (error) {
+    console.error('error while updating todo',error);
     res.status(400).json({ message: error.message });
   }
 };
@@ -49,6 +53,7 @@ exports.deleteTodo = async (req, res) => {
     if (!todo) return res.status(404).json({ message: 'Todo not found' });
     res.json({ message: 'Todo deleted' });
   } catch (error) {
+    console.error('error while deleting todo',error);
     res.status(400).json({ message: 'Invalid ID' });
   }
 };
