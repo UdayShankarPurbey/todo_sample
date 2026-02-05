@@ -9,23 +9,24 @@ connectDB();
 const app = express();
 
 
-const allowedOrigins = ['https://myfrontend.com'];
+// const allowedOrigins = ['https://myfrontend.com'];
 
 const cors_config = {
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  // origin: function (origin, callback) {
+  //   if (!origin || allowedOrigins.includes(origin)) {
+  //     callback(null, true);
+  //   } else {
+  //     callback(new Error('Not allowed by CORS'));
+  //   }
+  // },
+  origin : '*', // just for now use the above one always 
   credentials: true
 };
 
 
 
 // Middleware
-app.use(cors());
+app.use(cors(cors_config));
 app.use(express.json());
 
 // Routes
