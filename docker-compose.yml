@@ -14,7 +14,7 @@ services:
     build: 
       context: ./todo_frontend
       args:
-        API_URL: http://16.170.240.138:5000/api
+        API_URL: http://16.170.240.138:5000/api/
     container_name: frontend
     restart: always
     ports:
