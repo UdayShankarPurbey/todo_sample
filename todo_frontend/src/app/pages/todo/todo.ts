@@ -14,8 +14,11 @@ import { firstValueFrom } from 'rxjs';
 })
 export class TodoComponent {
   todoServices = inject(TodoServices);
+
   isModalOpen = signal(false);
   isEditMode = signal(false);
+  isSaving = signal(false);
+
   tasksList = signal<(TodoInterface & { loader: boolean })[]>([]);
   reloadTrigger = signal(0);
 
@@ -32,8 +35,11 @@ export class TodoComponent {
   form = form(this.loginform, (fieldPath) => {
     required(fieldPath.title, { message: 'Title is required' });
     minLength(fieldPath.title, 3, { message: 'Title must be at least 3 characters' });
+
     required(fieldPath.description, { message: 'Description is required' });
-    minLength(fieldPath.description, 5, { message: 'Description must be at least 5 characters' });
+    minLength(fieldPath.description, 5, {
+      message: 'Description must be at least 5 characters',
+    });
     maxLength(fieldPath.description, 200, {
       message: 'Description must be at most 200 characters',
     });
@@ -42,11 +48,10 @@ export class TodoComponent {
   constructor() {
     effect((onCleanup) => {
       this.reloadTrigger();
-      console.log('object', this.reloadTrigger());
 
       const sub = this.todoServices.getTodos().subscribe({
         next: (tasks: TodoInterface[]) =>
-          this.tasksList.set(tasks.map((task: TodoInterface) => ({ ...task, loader: false }))),
+          this.tasksList.set(tasks.map((task) => ({ ...task, loader: false }))),
         error: (err) => console.error('Error fetching tasks', err),
       });
 
@@ -60,77 +65,104 @@ export class TodoComponent {
 
   openAddModal() {
     this.loginform.set({ ...this.initialForm });
+    this.isEditMode.set(false);
     this.isModalOpen.set(true);
   }
 
-  openEditModal(task: TodoInterface) {
+  openEditModal(task: TodoInterface & { loader: boolean }) {
+    task.loader = true;
     this.loginform.set({ ...task });
-    this.tasksList().forEach((t) => {
-      if (t._id === task._id) {
-        t.loader = true;
-      }
-    });
-    this.isModalOpen.set(true);
     this.isEditMode.set(true);
+    this.isModalOpen.set(true);
   }
 
   closeModal() {
     this.isModalOpen.set(false);
+
     const task = this.loginform();
     if (task._id) {
       this.tasksList().forEach((t) => {
-        if (t._id === task._id) {
-          t.loader = false;
-        }
+        if (t._id === task._id) t.loader = false;
       });
     }
+
     this.loginform.set({ ...this.initialForm });
     this.isEditMode.set(false);
   }
 
-  saveTask(event: Event) {
+  async saveTask(event: Event) {
     event.preventDefault();
+
     submit(this.form, async () => {
-      const credentials = this.loginform();
+      const data = this.loginform();
+      this.isSaving.set(true);
+
       try {
         if (this.isEditMode()) {
-          if (!credentials._id) {
-            throw new Error('Task ID is missing for update operation.');
-          }
-          await firstValueFrom(this.todoServices.updateTodo(credentials._id, { ...credentials }));
+          await firstValueFrom(this.todoServices.updateTodo(data._id!, { ...data }));
         } else {
-          await firstValueFrom(this.todoServices.addTodo({ ...credentials }));
+          await firstValueFrom(this.todoServices.addTodo({ ...data }));
         }
 
         this.reloadTodos();
+        this.closeModal();
       } catch (error) {
         console.error('Error saving task:', error);
+      } finally {
+        this.isSaving.set(false);
       }
     });
-    this.closeModal();
   }
 
   async deleteTask(id: number | string) {
     this.tasksList().forEach((t) => {
-      if (t._id == id) {
-        t.loader = true;
-      }
+      if (t._id == id) t.loader = true;
     });
+
     try {
       await firstValueFrom(this.todoServices.deleteTodo(id));
       this.reloadTodos();
     } catch (error) {
       console.error('Error deleting task:', error);
       this.tasksList().forEach((t) => {
-        if (t._id == id) {
-          t.loader = false;
-        }
+        if (t._id == id) t.loader = false;
       });
+    }
+  }
+
+  async toggleComplete(task: TodoInterface & { loader: boolean }) {
+    // Set loader immutably
+    this.tasksList.update((tasks) =>
+      tasks.map((t) => (t._id === task._id ? { ...t, loader: true } : t)),
+    );
+
+    try {
+      await firstValueFrom(
+        this.todoServices.updateTodo(task._id, {
+          ...task,
+          completed: !task.completed,
+        }),
+      );
+
+      // Update completed and loader immutably
+      this.tasksList.update((tasks) =>
+        tasks.map((t) =>
+          t._id === task._id ? { ...t, completed: !t.completed, loader: false } : t,
+        ),
+      );
+    } catch (error) {
+      console.error('Error updating completion:', error);
+
+      // Turn off loader on error
+      this.tasksList.update((tasks) =>
+        tasks.map((t) => (t._id === task._id ? { ...t, loader: false } : t)),
+      );
     }
   }
 
   getTimeAgo(date: Date | undefined): string {
     if (!date) return '';
+
     const diff = Date.now() - new Date(date).getTime();
     const minutes = Math.floor(diff / 60000);
     const hours = Math.floor(minutes / 60);
